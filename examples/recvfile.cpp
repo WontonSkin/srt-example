@@ -92,6 +92,7 @@ int main(int argc, char* argv[])
    int64_t offset = 0;
 
    SRT_TRACEBSTATS trace;
+   memset(&trace, 0, sizeof(trace));
    srt_bstats(fhandle, &trace, true);
 
    if (SRT_ERROR == (recvsize = srt_recvfile(fhandle, argv[4], &offset, size, SRT_DEFAULT_RECVFILE_BLOCK)))
@@ -103,6 +104,7 @@ int main(int argc, char* argv[])
    srt_bstats(fhandle, &trace, true);
 
    cout << "speed = " << trace.mbpsRecvRate << "Mbits/sec" << endl;
+   cout << "## pktSndLossTotal = " << trace.pktSndLossTotal << " pktRecv = " << trace.pktRecv << endl;
    int losspercent = 100*trace.pktRcvLossTotal/trace.pktRecv;
    cout << "loss = " << trace.pktRcvLossTotal << "pkt (" << losspercent << "%)\n";
 

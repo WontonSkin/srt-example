@@ -158,6 +158,7 @@ DWORD WINAPI sendfile(LPVOID usocket)
    }
 
    SRT_TRACEBSTATS trace;
+   memset(&trace, 0, sizeof(trace));
    srt_bstats(fhandle, &trace, true);
 
    // send the file
@@ -170,6 +171,7 @@ DWORD WINAPI sendfile(LPVOID usocket)
 
    srt_bstats(fhandle, &trace, true);
    cout << "speed = " << trace.mbpsSendRate << "Mbits/sec" << endl;
+   cout << "## pktSndLossTotal = " << trace.pktSndLossTotal << " pktSent = " << trace.pktSent << endl;
    int losspercent = 100*trace.pktSndLossTotal/trace.pktSent;
    cout << "loss = " << trace.pktSndLossTotal << "pkt (" << losspercent << "%)\n";
 

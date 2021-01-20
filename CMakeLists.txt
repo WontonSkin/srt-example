@@ -1,62 +1,55 @@
 
-cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
-# XXX This can be potentially done in future, but there still exist
-# some dependent project using cmake 2.8 - this can't be done this way.
-#cmake_minimum_required (VERSION 3.0.2 FATAL_ERROR)
-#project(SRT VERSION "1.4.2")
-project(SRT C CXX)
+cmake_minimum_required(VERSION 3.0)
 
-set (SRT_VERSION 1.4.2)
+project(examples)
 
-# Use application-defined group reader
-# (currently the only one implemented)
-add_definitions(-DSRT_ENABLE_APP_READER)
 
-# XXX This was added once as experimental, it is now in force for
-# write-blocking-mode sockets. Still unclear if all issues around
-# closing while data still not written are eliminated.
-add_definitions(-DSRT_ENABLE_CLOSE_SYNCH)
+set(CMAKE_CXX_FLAGS "-DENABLE_LOGGING=1 -DENABLE_HEAVY_LOGGING=1 -Wall -Wextra -g -fPIE -g -pg -std=gnu++11")
+#SET(CMAKE_BUILD_TYPE "Debug")
+#SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+#SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 add_definitions(
+	-DENABLE_SOCK_CLOEXEC=1 
+	-DHAI_ENABLE_SRT=1 
+	-DHAI_PATCH=1 
+	-DHAVE_INET_PTON=1 
+	-DLINUX=1 
+	-DSRT_ENABLE_APP_READER 
+	-DSRT_ENABLE_BINDTODEVICE 
+	-DSRT_ENABLE_CLOSE_SYNCH 
+	-DSRT_ENABLE_ENCRYPTION 
+	-DSRT_VERSION=\"1.4.2\" 
+	-DUSE_OPENSSL=1 
 	-D_GNU_SOURCE
-	-DHAI_PATCH=1
-	-DHAI_ENABLE_SRT=1
-	-DSRT_VERSION="${SRT_VERSION}"
 )
 
 macro(srt_make_application name)
-	set(CMAKE_CXX_FLAGS  "-g -Wall -std=c++11")
-	target_link_libraries(${name} libsrt.a pthread crypto stdc++ -lm)
+	target_link_libraries(${name} libsrt.a -ldl -lssl -lcrypto -pthread)
 endmacro()
 
 macro(srt_add_example mainsrc)
 	get_filename_component(name ${mainsrc} NAME_WE)
-	add_executable(${name} examples/${mainsrc} ${ARGN})
+	add_executable(${name} examples/${mainsrc})
 endmacro()
 
-srt_add_example(sendfile.cpp)
-srt_make_application(sendfile)
+add_executable(sendfile examples/sendfile.cpp)
+target_link_libraries(sendfile libsrt.a -ldl -lssl -lcrypto -pthread)
 
-srt_add_example(recvfile.cpp)
-srt_make_application(recvfile)
+add_executable(recvfile examples/recvfile.cpp)
+target_link_libraries(recvfile libsrt.a -ldl -lssl -lcrypto -pthread)
 
-srt_add_example(recvlive.cpp)
-srt_make_application(recvlive)
+#srt_add_example(recvlive.cpp)
+#srt_make_application(recvlive)
 
-srt_add_example(test-c-client.c)
-srt_make_application(test-c-client)
+#srt_add_example(test-c-client.c)
+#srt_make_application(test-c-client)
 
-srt_add_example(test-c-server.c)
-srt_make_application(test-c-server)
+#srt_add_example(test-c-server.c)
+#srt_make_application(test-c-server)
 
-#srt_add_example(test-c-client-bonding.c)
-#srt_make_application(test-c-client-bonding)
-
-#srt_add_example(test-c-server-bonding.c)
-#srt_make_application(test-c-server-bonding)
-
-srt_add_example(testcapi-connect.c)
-target_link_libraries(testcapi-connect -lsrt)
+#srt_add_example(testcapi-connect.c)
+#target_link_libraries(testcapi-connect -lsrt)
 
 
 
